@@ -3,7 +3,8 @@ import Navigation from './src/navigation/Navigation';
 import './global.css';
 import { store } from './src/redux/Store';
 import { Provider } from 'react-redux';
-const App = () => {
+
+const App: React.FC = () => {
   return (
     <Provider store={store}>
       <Navigation />

@@ -1,14 +1,15 @@
 {
   "extends": "@react-native/typescript-config",
   "compilerOptions": {
-    "allowJs": true, // Allow TypeScript to process JS files
-    "checkJs": false // Optional: set to true if you want TS to type-check JS
+    "allowJs": true,
+    "checkJs": false
   },
   "include": [
     "**/*.ts",
     "**/*.tsx",
     "**/*.js",
-    "nativewind-env.d.ts"
+    "nativewind-env.d.ts",
+    "env.d.ts"
   ],
   "exclude": [
     "**/node_modules",
