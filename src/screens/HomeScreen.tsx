@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity } from 'react-native';
 import { StackNavigationProp } from '@react-navigation/stack';
 import { useDispatch, useSelector } from 'react-redux';
-import { RootStackParamList, QuizData } from '../types';
+import { RootStackParamList } from '../types';
 import { RootState } from '../redux/Store';
 import { setQuizInput, setHistory } from '../redux/Slice';
 import { getQuizHistory } from '../utils/storage';
@@ -66,19 +66,21 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
       </View>
 
       {/* Hero Card */}
-      <Card className="bg-indigo-900 border-indigo-800 p-6 mb-6">
+      <Card className="bg-indigo-950 border-indigo-900 p-6 mb-6 shadow-xl">
         <View className="flex-row items-center mb-3">
           <View className="w-10 h-10 rounded-xl bg-indigo-600 items-center justify-center mr-3">
             <Text className="text-white text-xl font-black">🤖</Text>
           </View>
-          <Text className="text-indigo-200 font-semibold text-sm">
-            AI-Powered Engine
-          </Text>
+          <View className="bg-indigo-900/80 px-3 py-1 rounded-full border border-indigo-700/50">
+            <Text className="text-indigo-300 font-bold text-xs uppercase tracking-wider">
+              AI-Powered Engine
+            </Text>
+          </View>
         </View>
-        <Text className="text-white font-extrabold text-2xl mb-2">
+        <Text className="text-white font-extrabold text-2xl mb-2 tracking-tight">
           Create AI Quizzes & Test Papers
         </Text>
-        <Text className="text-indigo-200 text-sm mb-6 leading-relaxed">
+        <Text className="text-slate-300 text-sm mb-6 leading-relaxed font-medium">
           Generate tailored questions, instant scoring flashcards, or exportable print papers in seconds.
         </Text>
         <CustomButton
@@ -129,7 +131,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
             key={index}
             onPress={() => handleSelectPreset(item)}
             activeOpacity={0.7}
-            className="flex-row items-center justify-between p-4 bg-white rounded-2xl border border-slate-200 shadow-sm"
+            className="flex-row items-center justify-between p-4 bg-white rounded-2xl border border-slate-200 shadow-sm mb-3"
           >
             <View className="flex-1 pr-3">
               <Text className="text-slate-900 font-bold text-base mb-1">
@@ -139,7 +141,7 @@ const HomeScreen: React.FC<HomeScreenProps> = ({ navigation }) => {
                 <Text className="text-indigo-600 text-xs font-semibold bg-indigo-50 px-2.5 py-0.5 rounded-md">
                   {item.level}
                 </Text>
-                <Text className="text-slate-400 text-xs">
+                <Text className="text-slate-500 text-xs font-medium ml-2">
                   {item.difficulty.join(', ')}
                 </Text>
               </View>

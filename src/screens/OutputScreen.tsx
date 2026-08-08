@@ -4,6 +4,8 @@ import {
   Text,
   ScrollView,
   TouchableOpacity,
+  Share,
+  Alert,
 } from 'react-native';
 import { useSelector, useDispatch } from 'react-redux';
 import { RouteProp } from '@react-navigation/native';
@@ -105,7 +107,7 @@ Return a JSON object with this exact structure:
           level,
           difficulty,
           questionType,
-          questions: parsed.questions || [],
+          questions: Array.isArray(parsed.questions) ? parsed.questions : [],
           markdownPaper: parsed.markdownPaper || textResponse,
           createdAt: Date.now(),
         };
@@ -126,6 +128,18 @@ Return a JSON object with this exact structure:
 
     generateQuizWithGemini();
   }, [topic, level, difficulty, questionType, questionCount]);
+
+  const handleExportPDFOrShare = async () => {
+    if (!quizData) return;
+    try {
+      await Share.share({
+        title: `TeachMate Test Paper - ${quizData.topic}`,
+        message: `TEACHMATE AI TEST PAPER\nTopic: ${quizData.topic} (${quizData.level})\n\n${quizData.markdownPaper}\n\nGenerated with TeachMate AI`,
+      });
+    } catch (error) {
+      Alert.alert('Share Error', 'Could not export or share test paper.');
+    }
+  };
 
   if (loading) {
     return <LoadingSkeleton message={`Crafting ${questionCount} questions on "${topic}"...`} />;
@@ -155,15 +169,23 @@ Return a JSON object with this exact structure:
       <View className="px-5 pt-10 pb-2">
         <Header
           title={quizData.topic}
-          subtitle={`${quizData.level} • ${quizData.questions.length} Questions`}
+          subtitle={`${quizData.level} • ${quizData.questions?.length || 0} Questions`}
           onBack={() => navigation.navigate('HomeScreen')}
+          rightAction={
+            <TouchableOpacity
+              onPress={handleExportPDFOrShare}
+              className="bg-indigo-50 border border-indigo-200 px-3.5 py-2 rounded-xl flex-row items-center shadow-sm"
+            >
+              <Text className="text-indigo-600 font-bold text-xs">Export / PDF 📥</Text>
+            </TouchableOpacity>
+          }
         />
 
         {/* Action Button: Play Interactive Quiz */}
-        {quizData.questions && quizData.questions.length > 0 && (
+        {Array.isArray(quizData.questions) && quizData.questions.length > 0 && (
           <TouchableOpacity
             onPress={() => navigation.navigate('QuizPlayerScreen', { quiz: quizData })}
-            className="bg-indigo-600 rounded-2xl p-4 flex-row items-center justify-between mb-3 shadow-md shadow-indigo-300"
+            className="bg-indigo-600 rounded-2xl p-4 flex-row items-center justify-between mb-3 shadow-md shadow-indigo-300 active:scale-[0.98] transition-all"
           >
             <View className="flex-row items-center">
               <Text className="text-2xl mr-3">🎮</Text>
@@ -218,37 +240,48 @@ Return a JSON object with this exact structure:
       <ScrollView className="flex-1 px-5 pt-2 pb-10" showsVerticalScrollIndicator={false}>
         {activeTab === 'paper' ? (
           <View className="bg-white rounded-3xl p-6 border border-slate-200 shadow-sm mb-12">
-            <Markdown>{quizData.markdownPaper}</Markdown>
+            <Markdown>{quizData.markdownPaper || 'No markdown paper available.'}</Markdown>
           </View>
         ) : (
           <View className="space-y-4 mb-12">
-            {quizData.questions.map((q, idx) => (
-              <View
-                key={q.id || idx}
-                className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm mb-3"
-              >
-                <Text className="text-indigo-600 font-bold text-xs uppercase tracking-wider mb-1">
-                  Q{idx + 1} • {q.type}
-                </Text>
-                <Text className="text-slate-900 font-bold text-base mb-3">
-                  {q.question}
-                </Text>
-                {q.options && (
-                  <View className="space-y-1.5 mb-3">
-                    {q.options.map((opt, oIdx) => (
-                      <Text key={oIdx} className="text-slate-700 text-sm">
-                        {String.fromCharCode(65 + oIdx)}. {opt}
-                      </Text>
-                    ))}
-                  </View>
-                )}
-                {q.explanation && (
-                  <Text className="text-slate-500 text-xs italic bg-slate-50 p-2.5 rounded-lg border border-slate-100">
-                    Solution: {q.explanation}
+            {Array.isArray(quizData.questions) && quizData.questions.length > 0 ? (
+              quizData.questions.map((q, idx) => (
+                <View
+                  key={q?.id || idx}
+                  className="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm mb-3"
+                >
+                  <Text className="text-indigo-600 font-bold text-xs uppercase tracking-wider mb-1">
+                    Q{idx + 1} • {typeof q?.type === 'string' ? q.type : 'Question'}
                   </Text>
-                )}
+                  <Text className="text-slate-900 font-bold text-base mb-3">
+                    {typeof q?.question === 'string' ? q.question : JSON.stringify(q?.question || '')}
+                  </Text>
+                  {Array.isArray(q?.options) && q.options.length > 0 && (
+                    <View className="space-y-1.5 mb-3">
+                      {q.options.map((opt, oIdx) => (
+                        <Text key={oIdx} className="text-slate-700 text-sm mb-1">
+                          {String.fromCharCode(65 + oIdx)}. {typeof opt === 'string' ? opt : JSON.stringify(opt)}
+                        </Text>
+                      ))}
+                    </View>
+                  )}
+                  {q?.explanation && (
+                    <Text className="text-slate-500 text-xs italic bg-slate-50 p-2.5 rounded-lg border border-slate-100">
+                      Solution: {typeof q.explanation === 'string' ? q.explanation : JSON.stringify(q.explanation)}
+                    </Text>
+                  )}
+                </View>
+              ))
+            ) : (
+              <View className="bg-white rounded-2xl p-6 border border-slate-200 items-center justify-center my-6">
+                <Text className="text-slate-800 font-bold text-base mb-1">
+                  No Question Summary Available
+                </Text>
+                <Text className="text-slate-500 text-xs text-center">
+                  Check the "Printable Test Paper" tab to view the complete test paper and answer keys.
+                </Text>
               </View>
-            ))}
+            )}
           </View>
         )}
       </ScrollView>

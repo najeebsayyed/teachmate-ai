@@ -9,7 +9,8 @@ interface CardProps {
 }
 
 const Card: React.FC<CardProps> = ({ children, className = '', style, onPress }) => {
-  const containerStyles = `bg-white rounded-3xl p-5 border border-slate-100 shadow-xl shadow-slate-200/50 ${className}`;
+  const hasBg = className.includes('bg-');
+  const containerStyles = `${hasBg ? '' : 'bg-white'} rounded-3xl p-5 border border-slate-100 shadow-xl shadow-slate-200/50 ${className}`;
 
   if (onPress) {
     return (
